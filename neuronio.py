@@ -15,3 +15,8 @@ class Neuronio:
         sigmoid = 1/(1+np.exp((-1)*x))
         self.y = sigmoid
         return sigmoid
+    def atualizar_pesos(self,erro,taxa_aprendizagem):
+        gradiente = self.y * (1 - self.y) * erro
+        for i in range(0,len(self.lstX)):
+         self.lstW[i] = taxa_aprendizagem * self.lstX[i] * gradiente
+        print self.lstW
