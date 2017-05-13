@@ -23,10 +23,11 @@ saida_esperada = [0]
 '''n3 = neuronio.Neuronio(3,[],0,gerarPesosAleatorios(),rand.uniform(-2.4/Fi,2.4/Fi))
 n4 = neuronio.Neuronio(4,[],0,gerarPesosAleatorios(),rand.uniform(-2.4/Fi,2.4/Fi))
 n5 = neuronio.Neuronio(5,[],0,gerarPesosAleatorios(),rand.uniform(-2.4/Fi,2.4/Fi))'''
+n5 = neuronio.Neuronio(5,[],0,[-1.2,1.1],0.3,None,True)
 
-n3 = neuronio.Neuronio(3,[],0,[0.5,0.4],0.8)
-n4 = neuronio.Neuronio(4,[],0,[0.9,1],-0.1)
-n5 = neuronio.Neuronio(5,[],0,[-1.2,1.1],0.3)
+n3 = neuronio.Neuronio(3,[],0,[0.5,0.4],0.8,n5,False)
+n4 = neuronio.Neuronio(4,[],0,[0.9,1],-0.1,n5,False)
+
 
 camadas = [[n3,n4],[n5]]
 
@@ -52,7 +53,6 @@ print("erro: ",erro[0])
 print(camadas[0][0].atualizar_pesos(erro,taxa_aprendizagem))
 print(camadas[0][1].atualizar_pesos(erro,taxa_aprendizagem))
 print(camadas[1][0].atualizar_pesos(erro,taxa_aprendizagem))
-
 
 
 
