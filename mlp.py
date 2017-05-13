@@ -2,15 +2,16 @@ import neuronio
 import random as rand
 import numpy as np
 
+
 Fi = 2
 class Mlp:
-    def __init__(self,inputVect,output,taxa_aprendizagem):
-        self.lstX = inputVect #[1,0] n0,n1
-        self.desiredOutput = output
+    def __init__(self,inputVector,taxa_aprendizagem):
+        self.lstX = inputVector[:2] #[1,0] n0,n1
+        self.desiredOutput = inputVector[2]
         self.error = 0
 
-        n2 = neuronio.Neuronio(2, inputVect, 0, [0.5, 0.4], 0.8)
-        n3 = neuronio.Neuronio(3, inputVect, 0, [0.9, 1], -0.1)
+        n2 = neuronio.Neuronio(2, self.lstX, 0, [0.5, 0.4], 0.8)
+        n3 = neuronio.Neuronio(3, self.lstX, 0, [0.9, 1], -0.1)
         n4 = neuronio.Neuronio(4,[0,0],0,[-1.2,1.1],0.3)
 
         #n2 = neuronio.Neuronio(2, inputVect, 0, self.createRandomWeights(), rand.uniform(-2.4 / Fi, 2.4 / Fi))
@@ -69,32 +70,38 @@ class Mlp:
         self.outputLayer.valor_teta += delta_teta4
 
 
-    def train(self):
+    def train(self,inputTrain):
+        if(inputTrain!=None):
+            self.lstX = inputTrain[:2]
+            self.desiredOutput = inputTrain[2]
+            self.error = 0
+            self.hiddenLayer[0].lstX = self.lstX
+            self.hiddenLayer[1].lstX = self.lstX
+
         ep = 0
         while(1):
             self.activate_neurons()
             self.error = self.desiredOutput - self.outputLayer.y
-            if((self.desiredOutput-self.error)**2 < 0.001):
+            mse = np.mean((self.desiredOutput - self.outputLayer.y) ** 2)
+            if(mse < 0.001):
                 break
             else:
                 self.calculate_weight_matrix()
                 self.update_weight_matrix()
             ep += 1
+
         return ep
 
     def test(self,inputTest):
+        print("matriz atual:",self.matWeight)
         self.lstX = inputTest
+        self.hiddenLayer[0].lstX = inputTest
+        self.hiddenLayer[1].lstX = inputTest
         self.activate_neurons()
         return self.outputLayer.y
 
 
-    def train2(self):
-        ep = 0
 
-        self.activate_neurons()
-        self.error = self.desiredOutput - self.outputLayer.y
-        self.calculate_weight_matrix()
-        self.update_weight_matrix()
 
 
 
