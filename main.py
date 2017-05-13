@@ -1,12 +1,13 @@
 import mlp
 
 matTrain = [[1,1,0],[0,0,0],[0,1,1],[1,0,1]]
-m = mlp.Mlp(matTrain[0],0.1)
-m.train(None)
+m = mlp.Mlp(0.1)
+epo = m.train(matTrain)
 
-for i in range(1,len(matTrain)):
-    m.train(matTrain[i])
-print("Terminou treinamento")
+print("Terminou treinamento",epo)
 
+print("test",m.test([0,1]))
 print("test",m.test([1,1]))
+print("test",m.test([1,0]))
+print("test",m.test([0,0]))
 

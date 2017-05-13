@@ -5,9 +5,9 @@ import numpy as np
 
 Fi = 2
 class Mlp:
-    def __init__(self,inputVector,taxa_aprendizagem):
-        self.lstX = inputVector[:2] #[1,0] n0,n1
-        self.desiredOutput = inputVector[2]
+    def __init__(self,taxa_aprendizagem):
+        self.lstX = [0,0] #[1,0] n0,n1
+        self.desiredOutput = 0
         self.error = 0
 
         n2 = neuronio.Neuronio(2, self.lstX, 0, [0.5, 0.4], 0.8)
@@ -69,31 +69,34 @@ class Mlp:
         self.hiddenLayer[1].valor_teta += delta_teta3
         self.outputLayer.valor_teta += delta_teta4
 
+    def feed_forward(self,inst):
+        self.lstX = inst[:2]
+        self.desiredOutput = inst[2]
+        self.hiddenLayer[0].lstX = self.lstX
+        self.hiddenLayer[1].lstX = self.lstX
+        self.activate_neurons()
+
+    def backward(self):
+        self.calculate_weight_matrix()
+        self.update_weight_matrix()
 
     def train(self,inputTrain):
-        if(inputTrain!=None):
-            self.lstX = inputTrain[:2]
-            self.desiredOutput = inputTrain[2]
-            self.error = 0
-            self.hiddenLayer[0].lstX = self.lstX
-            self.hiddenLayer[1].lstX = self.lstX
-
         ep = 0
         while(1):
-            self.activate_neurons()
-            self.error = self.desiredOutput - self.outputLayer.y
-            mse = np.mean((self.desiredOutput - self.outputLayer.y) ** 2)
-            if(mse < 0.001):
+            mse = 0
+            for i in range(0,len(inputTrain)):
+                self.feed_forward(inputTrain[i])
+                self.error = self.desiredOutput - self.outputLayer.y
+                mse += self.error**2
+                self.backward()
+            ep+=1
+            mse /= 4
+            if(mse<0.001):
                 break
-            else:
-                self.calculate_weight_matrix()
-                self.update_weight_matrix()
-            ep += 1
 
         return ep
 
     def test(self,inputTest):
-        print("matriz atual:",self.matWeight)
         self.lstX = inputTest
         self.hiddenLayer[0].lstX = inputTest
         self.hiddenLayer[1].lstX = inputTest
