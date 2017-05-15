@@ -2,22 +2,23 @@ import neuronio
 import random as rand
 import numpy as np
 
-
 Fi = 2
-function =4
+
 class Mlp:
-    def __init__(self,taxa_aprendizagem):
+    def __init__(self,taxa_aprendizagem,opt_func,max_iter):
         self.lstX = [0,0] #[1,0] n0,n1
         self.desiredOutput = 0
         self.error = 0
+        self.function = opt_func
+        self.max_it = max_iter
 
-        n2 = neuronio.Neuronio(2, self.lstX, 0, [0.5, 0.4], 0.8)
-        n3 = neuronio.Neuronio(3, self.lstX, 0, [0.9, 1], -0.1)
-        n4 = neuronio.Neuronio(4,[0,0],0,[-1.2,1.1],0.3)
+        #n2 = neuronio.Neuronio(2, self.lstX, 0, [0.5, 0.4], 0.8)
+        #n3 = neuronio.Neuronio(3, self.lstX, 0, [0.9, 1], -0.1)
+        #n4 = neuronio.Neuronio(4,[0,0],0,[-1.2,1.1],0.3)
 
-        #n2 = neuronio.Neuronio(2, inputVect, 0, self.createRandomWeights(), rand.uniform(-2.4 / Fi, 2.4 / Fi))
-        #n3 = neuronio.Neuronio(3, inputVect, 0, self.createRandomWeights(), rand.uniform(-2.4 / Fi, 2.4 / Fi))
-        #n4 = neuronio.Neuronio(4, [], 0, gerarPesosAleatorios(), rand.uniform(-2.4 / Fi, 2.4 / Fi))
+        n2 = neuronio.Neuronio(2, self.lstX, 0, self.createRandomWeights(), rand.uniform(-2.4 / Fi, 2.4 / Fi))
+        n3 = neuronio.Neuronio(3, self.lstX, 0, self.createRandomWeights(), rand.uniform(-2.4 / Fi, 2.4 / Fi))
+        n4 = neuronio.Neuronio(4, [0,0], 0, self.createRandomWeights(), rand.uniform(-2.4 / Fi, 2.4 / Fi))
 
         self.hiddenLayer = [n2,n3]
         self.outputLayer = n4
@@ -44,32 +45,31 @@ class Mlp:
 
     def activate_neurons(self):
         for i in range(0,len(self.hiddenLayer)):
-            new_y = self.hiddenLayer[i].ativar(function)
+            new_y = self.hiddenLayer[i].ativar(self.function)
             self.outputLayer.lstX[i] = new_y
 
-        self.outputLayer.ativar(function)
+        self.outputLayer.ativar(self.function)
 
     def calculate_weight_matrix(self):
-        if(function==1):
+        if(self.function==1):
             grad_4 = 1*self.error
             grad_2 = 1*grad_4*self.matWeight[2][4]
             grad_3 = 1*grad_4*self.matWeight[3][4]
-        if(function==2):
+        if(self.function==2):
             grad_4 = self.outputLayer.y*(1-self.outputLayer.y)*self.error
             grad_2 = self.hiddenLayer[0].y*(1-self.hiddenLayer[0].y)*grad_4*self.matWeight[2][4]
             grad_3 = self.hiddenLayer[1].y*(1-self.hiddenLayer[1].y)*grad_4*self.matWeight[3][4]
-        if(function==3):
+        if(self.function==3):
             grad_4 = (1-self.outputLayer.hyperbolic_tangent_activation(self.outputLayer.y)**2)*self.error
-            #grad_4 = y5*(1-hp(y5)^2)*erro
             grad_2 = (1-self.hiddenLayer[0].hyperbolic_tangent_activation(self.hiddenLayer[0].y)**2)*grad_4*self.matWeight[2][4]
-           # grad_2 = y2*(1-hp(y2)^2)*grad4*W25
             grad_3 = (1-self.hiddenLayer[1].hyperbolic_tangent_activation(self.hiddenLayer[1].y)**2)*grad_4*self.matWeight[3][4]
-            # grad_3 = y3*(1-hp(y3)^2)*grad4*W35c
-        if(function==4):
-            print('dkm',self.hiddenLayer[0].y,self.hiddenLayer[1].y)
-            grad_4 = -2*self.outputLayer.y*self.outputLayer.gaussian_activation(self.outputLayer.y)*self.error
-            grad_2 = -2*self.hiddenLayer[0].y*self.hiddenLayer[0].gaussian_activation(self.hiddenLayer[0].y)* grad_4*self.matWeight[2][4]
-            grad_3 = -2*self.hiddenLayer[1].y*self.hiddenLayer[1].gaussian_activation(self.hiddenLayer[1].y)* grad_4*self.matWeight[3][4]
+            #print('grad', grad_4, grad_2, grad_3)
+        if(self.function==4):
+
+            grad_4 = (-2)*self.outputLayer.y*(self.outputLayer.gaussian_activation(self.outputLayer.y))*self.error
+            grad_2 = (-2)*self.hiddenLayer[0].y*(self.hiddenLayer[0].gaussian_activation(self.hiddenLayer[0].y))*grad_4*self.matWeight[2][4]
+            grad_3 = (-2)*self.hiddenLayer[1].y*(self.hiddenLayer[1].gaussian_activation(self.hiddenLayer[1].y))*grad_4*self.matWeight[3][4]
+           # print('grad',self.outputLayer.y,self.outputLayer.gaussian_activation(self.outputLayer.y),grad_3)
 
         delta_weight4 = [self.alfa*self.hiddenLayer[0].y*grad_4,self.alfa*self.hiddenLayer[1].y*grad_4]
         delta_weight2 = [self.alfa * self.hiddenLayer[0].lstX[0] * grad_2, self.alfa * self.hiddenLayer[0].lstX[1] * grad_2]
@@ -109,7 +109,7 @@ class Mlp:
                 self.backward()
             ep+=1
             mse /= 4
-            if(mse<0.001):
+            if(mse<0.001 or ep > self.max_it):
                 break
 
         return ep
@@ -119,7 +119,12 @@ class Mlp:
         self.hiddenLayer[0].lstX = inputTest
         self.hiddenLayer[1].lstX = inputTest
         self.activate_neurons()
-        return self.outputLayer.y
+        if(self.outputLayer.y>0.8 and self.outputLayer.y<=1):
+            return 1
+        if(self.outputLayer.y>=0 and self.outputLayer.y<0.1):
+            return 0
+        return -1
+        #return self.outputLayer.y
 
 
 
